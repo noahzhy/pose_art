@@ -124,6 +124,7 @@ if __name__ == "__main__":
             color_image = np.asanyarray(color_frame.get_data())
 
             skeletons = api.estimate_keypoints(color_image, 192)
+            print(skeletons)
             # perform inference again to demonstrate tracking functionality.
             # usually you would estimate the keypoints on another image and then
             # update the tracking id

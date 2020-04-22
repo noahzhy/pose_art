@@ -16,3 +16,11 @@ print(type(skeleton_color[0]), type(color[0]))
 # while count < limit:
 #     print('A', end=" ")
 #     count += 1
+
+# print('start...')
+# while True:
+#     txt = input('me: ')
+#     if txt == 'bye':
+#         print('computer:', 'I wonned!')
+#         break
+#     print('computer:', txt)
