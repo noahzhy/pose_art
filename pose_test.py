@@ -10,7 +10,9 @@ from cubemos.core.nativewrapper import CM_TargetComputeDevice
 from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 
-confidence_threshold = 0.4
+
+confidence_threshold = 0.35
+skeleton_color = np.random.randint(256, size=3).tolist()
 
 pipe = rs.pipeline()
 config = rs.config()
@@ -88,21 +90,23 @@ def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
 
 
 def render_result(skeletons, img, confidence_threshold):
-    skeleton_color = (100, 254, 213)
     for index, skeleton in enumerate(skeletons):
         limbs = get_valid_limbs(keypoint_ids, skeleton, confidence_threshold)
         for limb in limbs:
             cv2.line(
-                img, limb[0], limb[1], skeleton_color, thickness=2, lineType=cv2.LINE_AA
+                img,
+                limb[0],
+                limb[1],
+                skeleton_color,
+                thickness=2,
+                lineType=cv2.LINE_AA
             )
 
-# Main content begins
+
 if __name__ == "__main__":
     try:
         check_license_and_variables_exist()
-        # Get the path of the native libraries and ressource files
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
-
         # initialize the api with a valid license key in default_license_dir()
         api = Api(default_license_dir())
         model_path = os.path.join(
@@ -136,12 +140,8 @@ if __name__ == "__main__":
                 cv2.destroyAllWindows()
                 break
 
-        # print("Detected skeletons: ", len(skeletons))
-            
     except Exception as ex:
         print("Exception occured: \"{}\"".format(ex))
 
     finally:
         pipe.stop()
-
-
