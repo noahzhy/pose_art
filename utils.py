@@ -1,28 +1,34 @@
 import numpy as np
 
+# a = np.array([2, 2])
+# b = np.array([3, 2])
+# c = np.array([1, 1])
+# d = np.array([2, 1])
 
-def calculate_angle(point_a, point_b):
-    """ Calculate angle between two points """
-    ang_a = np.arctan2(*point_a[::-1])
-    ang_b = np.arctan2(*point_b[::-1])
-    return np.rad2deg((ang_a - ang_b) % (2 * np.pi))
+# points = np.array([])
 
-a = np.array([14, 140])
-b = np.array([13, 120])
-c = np.array([12, 130])
-d = np.array([11, 110])
+# A = b - a
+# B = c - b
+# C = a - c
+# D = d - b
+# print(A, B, C, D)
 
-# create vectors
-ba = a - b
-bc = c - b
-cd = d - c
+A = (2, 2)
+B = (3, 2)
+C = (2, 1)
 
-# calculate angle
-cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+D = (4, 3)
 
-angle = np.arccos(cosine_angle)
-inner_angle = np.degrees(angle)
+def angle(B, A, C):
+    # angle of A
+    a = np.array(A)
+    b = np.array(B)
+    c = np.array(C)
+    e1, e2 = (c-a, b-a)
+    num = np.dot(e1, e2)
+    denom = np.linalg.norm(e1) * np.linalg.norm(e2)
+    angle = np.arccos(num/denom) * 180 / np.pi
+    return int(angle)
 
-print(inner_angle)  # 8.57299836361
-print(calculate_angle(bc, cd)) # 188.572998364
-print(calculate_angle(cd, bc)) # 171.427001636
+print(angle(A, B, D))
+# print(sum(angles))
