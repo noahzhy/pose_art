@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from cubemos.core.nativewrapper import CM_TargetComputeDevice
 from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
@@ -93,11 +92,12 @@ class SKP:
         self.model_path = os.path.join(
             os.environ["CUBEMOS_SKEL_SDK"], "models", "skeleton-tracking", "fp32", "skeleton-tracking.cubemos"
         )
+        self.api.load_model(CM_TargetComputeDevice.CM_CPU, self.model_path)
 
     def get_skp_from_pic(self, pic_path):
         try:
+            print(pic_path)
             img = cv2.imread(pic_path)
-            self.api.load_model(CM_TargetComputeDevice.CM_CPU, self.model_path)
             skeletons = self.api.estimate_keypoints(img, 192)
             render_result(skeletons, img, self.confidence_threshold)
             file_name = os.path.basename(pic_path)
@@ -105,6 +105,10 @@ class SKP:
                 f.write(str(skeletons))
 
             isSaved = cv2.imwrite("{}/{}".format(self.output_path, file_name), img)
+            if isSaved:
+                return True
+            else:
+                print("has")
 
         except Exception as ex:
             print("Exception occured: \"{}\"".format(ex))
