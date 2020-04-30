@@ -4,7 +4,12 @@ import glob
 import time
 import datetime
 from estimate_keypoints import SKP
+from Body import Body
+from collections import namedtuple
 
+
+Coordinate = namedtuple("Coordinate", ["x", "y"])
+SkeletonKeypoints = namedtuple("SkeletonKeypoints", ["joints", "confidences", "id"])
 
 ARTS_RES_PATH = 'arts_res'
 ARTS_SKP_PATH = 'skp_output'
@@ -25,8 +30,6 @@ def get_file_basename(path):
 def load_arts_res():
     arts_res = set()
     skp_res = set()
-    
-
     print('[INFO] check folder')
 
     if mk_dir(ARTS_RES_PATH):
@@ -45,5 +48,6 @@ def load_arts_res():
 
 
 if __name__ == "__main__":
-    # run()
     load_arts_res()
+
+

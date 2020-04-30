@@ -1,13 +1,25 @@
+import pyrealsense2 as rs
+import numpy as np
+import platform
+import argparse
+import cv2
+import os
+
+from Body import Body
+
+from pprint import pprint
 from cubemos.core.nativewrapper import CM_TargetComputeDevice
 from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
-import os
-import cv2
-import json
-import platform
-from pprint import pprint
-from Body import Body
 
+
+confidence_threshold = 0.35
+skeleton_color = np.random.randint(256, size=3).tolist()
+
+pipe = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.color, 320, 240, rs.format.bgr8, 30)
+pipe.start(config)
 
 keypoint_ids = [
     (1, 2),
@@ -54,7 +66,7 @@ def check_license_and_variables_exist():
         raise Exception(
             "The license file has not been found at location \"" +
             default_license_dir() + "\". "
-            "use the post-installation script to generate the license file")
+        )
     if "CUBEMOS_SKEL_SDK" not in os.environ:
         raise Exception(
             "The environment Variable \"CUBEMOS_SKEL_SDK\" is not set. "
@@ -77,52 +89,58 @@ def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
 
 
 def render_result(skeletons, img, confidence_threshold):
-    skeleton_color = (100, 254, 213)
     for index, skeleton in enumerate(skeletons):
         limbs = get_valid_limbs(keypoint_ids, skeleton, confidence_threshold)
         for limb in limbs:
-            cv2.line(img, limb[0], limb[1], skeleton_color, thickness=2, lineType=cv2.LINE_AA)
-
-
-class SKP:
-    def __init__(self):
-        super().__init__()
-        check_license_and_variables_exist()
-        self.body = Body()
-        self.confidence_threshold = 0.5
-        self.output_path = "output"
-        self.skp_output_path = "skp_output"
-        self.api = Api(default_license_dir())
-        self.model_path = os.path.join(
-            os.environ["CUBEMOS_SKEL_SDK"], "models", "skeleton-tracking", "fp32", "skeleton-tracking.cubemos"
-        )
-        self.api.load_model(CM_TargetComputeDevice.CM_CPU, self.model_path)
-
-    def get_skp_from_pic(self, pic_path):
-        try:
-            skps = dict()
-            img = cv2.imread(pic_path)
-            skeletons = self.api.estimate_keypoints(img, 192)
-            # render_result(skeletons, img, self.confidence_threshold)
-            file_name = os.path.basename(pic_path)
-            with open("{}/{}.json".format(self.skp_output_path, os.path.splitext(file_name)[0]), "w") as f:
-                for i in skeletons:
-                    self.body.set_body(i)
-                    id = skeletons.index(i)
-                    skps[str(id)] = self.body.calculate_angles()
-                
-                json.dump(skps, f)
-
-            isSaved = cv2.imwrite("{}/{}".format(self.output_path, file_name), img)
-            if isSaved:
-                return True
-            else:
-                print("has")
-
-        except Exception as ex:
-            print("Exception occured: \"{}\"".format(ex))
+            cv2.line(
+                img,
+                limb[0],
+                limb[1],
+                skeleton_color,
+                thickness=2,
+                lineType=cv2.LINE_AA
+            )
 
 
 if __name__ == "__main__":
-    skp = SKP()
-    skp.get_skp_from_pic("arts_res/001.jpg")
+    try:
+        check_license_and_variables_exist()
+        sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
+        api = Api(default_license_dir())
+        model_path = os.path.join(
+            sdk_path,
+            "models",
+            "skeleton-tracking",
+            "fp32",
+            "skeleton-tracking.cubemos"
+        )
+        api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
+
+        body = Body()
+
+        while True:
+            frames = pipe.wait_for_frames()
+            color_frame = frames.get_color_frame()
+            color_image = np.asanyarray(color_frame.get_data())
+            skeletons = api.estimate_keypoints(color_image, 192)
+            new_skeletons = api.estimate_keypoints(color_image, 192)
+            new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
+            render_result(skeletons, color_image, confidence_threshold)
+            
+            for i in skeletons:
+                body.set_body(i)
+                print(body.calculate_angles())
+
+            cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
+            cv2.imshow("preview", color_image)
+            
+            key = cv2.waitKey(1)
+            if key & 0xFF == ord('q') or key == 27:
+                cv2.destroyAllWindows()
+                break
+
+    except Exception as ex:
+        print("Exception occured: \"{}\"".format(ex))
+
+    finally:
+        pipe.stop()

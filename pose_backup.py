@@ -64,13 +64,10 @@ def check_license_and_variables_exist():
         raise Exception(
             "The license file has not been found at location \"" +
             default_license_dir() + "\". "
-            "Please have a look at the Getting Started Guide on how to "
-            "use the post-installation script to generate the license file")
+        )
     if "CUBEMOS_SKEL_SDK" not in os.environ:
         raise Exception(
             "The environment Variable \"CUBEMOS_SKEL_SDK\" is not set. "
-            "Please check the troubleshooting section in the Getting "
-            "Started Guide to resolve this issue." 
         )
 
 
@@ -107,7 +104,6 @@ if __name__ == "__main__":
     try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
-        # initialize the api with a valid license key in default_license_dir()
         api = Api(default_license_dir())
         model_path = os.path.join(
             sdk_path,
@@ -122,17 +118,11 @@ if __name__ == "__main__":
             frames = pipe.wait_for_frames()
             color_frame = frames.get_color_frame()
             color_image = np.asanyarray(color_frame.get_data())
-
             skeletons = api.estimate_keypoints(color_image, 192)
-            print(skeletons)
-            # perform inference again to demonstrate tracking functionality.
-            # usually you would estimate the keypoints on another image and then
-            # update the tracking id
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
-            # render the points
             render_result(skeletons, color_image, confidence_threshold)
-
+            
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", color_image)
             

@@ -1,26 +1,20 @@
-import numpy as np
-import random
 
-x = random.randint(0, 255)
+from collections import namedtuple
+import os
+import json
 
-skeleton_color = tuple(list(np.random.choice(range(1, 256), size=3)))
-# skeleton_color = np.random.randint(256, size=3).tolist()
-color = (100, 254, 213)
-print(skeleton_color, color)
-print(type(skeleton_color), type(color))
-print(type(skeleton_color[0]), type(color[0]))
 
-# import random
-# limit = random.randint(1, 11)
-# count = 0
-# while count < limit:
-#     print('A', end=" ")
-#     count += 1
+Coordinate = namedtuple("Coordinate", ["x", "y"])
+SkeletonKeypoints = namedtuple("SkeletonKeypoints", ["joints", "confidences", "id"])
 
-# print('start...')
-# while True:
-#     txt = input('me: ')
-#     if txt == 'bye':
-#         print('computer:', 'I wonned!')
-#         break
-#     print('computer:', txt)
+skeletons = [SkeletonKeypoints(joints=[Coordinate(x=394.66668701171875, y=272.0), Coordinate(x=426.66668701171875, y=442.66668701171875), Coordinate(x=266.66668701171875, y=453.3333435058594), Coordinate(x=224.0, y=730.6666870117188), Coordinate(x=-1.0, y=-1.0), Coordinate(x=597.3333740234375, y=442.66668701171875), Coordinate(x=682.6666870117188, y=752.0), Coordinate(x=490.66668701171875, y=720.0), Coordinate(x=288.0, y=933.3333740234375), Coordinate(x=-1.0, y=-1.0), Coordinate(x=-1.0, y=-1.0), Coordinate(x=480.0, y=976.0), Coordinate(x=-1.0, y=-1.0), Coordinate(x=-1.0, y=-1.0), Coordinate(x=352.0, y=240.0), Coordinate(x=426.66668701171875, y=229.33334350585938), Coordinate(x=309.3333435058594, y=261.3333435058594), Coordinate(x=490.66668701171875, y=218.6666717529297)], confidences=[0.9431966543197632, 0.8282583951950073, 0.7755342125892639, 0.6829060912132263, 0.0, 0.8233133554458618, 0.7878410220146179, 0.840853750705719, 0.29739099740982056, 0.0, 0.0, 0.32887616753578186, 0.0, 0.0, 0.9171513319015503, 0.9690274596214294, 0.7840135097503662, 0.9125882983207703], id=0)]
+
+
+skps = dict()
+with open("{}/{}.json".format('skp_output', '001'), "w") as f:
+    for i in skeletons:
+        skps['id'] = skeletons.index(i)
+        print(skps)
+        # skps['skp'] = body.calculate_angles()
+    
+    json.dump(skps, f)
