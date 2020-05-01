@@ -80,6 +80,4 @@ if __name__ == "__main__":
     for i in bodies:
         body = Body()
         body.set_body(i)
-        eva = body.calculate_angles()
-        # eva.calculate_angles()
-        print(eva)
+        print(body.calculate_angles())
