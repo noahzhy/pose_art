@@ -22,25 +22,11 @@ config.enable_stream(rs.stream.color, 320, 240, rs.format.bgr8, 30)
 pipe.start(config)
 
 keypoint_ids = [
-    (1, 2),
-    (1, 5),
-    (2, 3),
-    (3, 4),
-    (5, 6),
-    (6, 7),
-    (1, 8),
-    (8, 9),
-    (9, 10),
-    (1, 11),
-    (11, 12),
-    (12, 13),
-    (1, 0),
-    (0, 14),
-    (14, 16),
-    (0, 15),
-    (15, 17),
+    (1, 2),(1, 5),(2, 3),(3, 4),(5, 6),(6, 7),(1, 8),(8, 9),(9, 10),
+    (1, 11),(11, 12),(12, 13),(1, 0),(0, 14),(14, 16),(0, 15),(15, 17),
 ]
 
+standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
 
 def default_log_dir():
     if platform.system() == "Windows":
@@ -122,6 +108,8 @@ if __name__ == "__main__":
             frames = pipe.wait_for_frames()
             color_frame = frames.get_color_frame()
             color_image = np.asanyarray(color_frame.get_data())
+            color_image = cv2.flip(color_image, 1)
+
             skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
@@ -129,7 +117,7 @@ if __name__ == "__main__":
             
             for i in skeletons:
                 body.set_body(i)
-                print(body.calculate_angles())
+                print('correct: ', body.compare_skps_angles(10, standard))
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", color_image)
