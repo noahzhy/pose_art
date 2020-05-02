@@ -10,25 +10,9 @@ from Body import Body
 
 
 keypoint_ids = [
-    (1, 2),
-    (1, 5),
-    (2, 3),
-    (3, 4),
-    (5, 6),
-    (6, 7),
-    (1, 8),
-    (8, 9),
-    (9, 10),
-    (1, 11),
-    (11, 12),
-    (12, 13),
-    (1, 0),
-    (0, 14),
-    (14, 16),
-    (0, 15),
-    (15, 17),
+    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10),
+    (1, 11), (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17),
 ]
-
 
 def default_log_dir():
     if platform.system() == "Windows":
@@ -63,7 +47,8 @@ def check_license_and_variables_exist():
 
 def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
     limbs = [
-        (tuple(map(int, skeleton.joints[i])), tuple(map(int, skeleton.joints[v])))
+        (tuple(map(int, skeleton.joints[i])),
+         tuple(map(int, skeleton.joints[v])))
         for (i, v) in keypoint_ids
         if skeleton.confidences[i] >= confidence_threshold
         and skeleton.confidences[v] >= confidence_threshold
@@ -76,21 +61,12 @@ def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
     return valid_limbs
 
 
-# def render_result(skeletons, img, confidence_threshold):
-#     skeleton_color = (100, 254, 213)
-#     for index, skeleton in enumerate(skeletons):
-#         limbs = get_valid_limbs(keypoint_ids, skeleton, confidence_threshold)
-#         for limb in limbs:
-#             cv2.line(img, limb[0], limb[1], skeleton_color, thickness=2, lineType=cv2.LINE_AA)
-
-
 class SKP:
     def __init__(self):
         super().__init__()
         check_license_and_variables_exist()
         self.body = Body()
         self.confidence_threshold = 0.5
-        self.output_path = "output"
         self.skp_output_path = "skp_output"
         self.api = Api(default_license_dir())
         self.model_path = os.path.join(
@@ -102,8 +78,6 @@ class SKP:
         try:
             img = cv2.imread(pic_path)
             skeletons = self.api.estimate_keypoints(img, 192)
-            # draw the lines
-            # render_result(skeletons, img, self.confidence_threshold)
             file_name = os.path.basename(pic_path)
             with open("{}/{}.json".format(self.skp_output_path, os.path.splitext(file_name)[0]), "w") as f:
                 skps = dict()
@@ -113,14 +87,10 @@ class SKP:
                     skps[id] = dict()
                     skps[id]['head'] = self.body.get_head_coordinates()
                     skps[id]['angles'] = self.body.calculate_angles()
-                
                 json.dump(skps, f)
 
-            isSaved = cv2.imwrite("{}/{}".format(self.output_path, file_name), img)
-            if isSaved:
-                return True
-            else:
-                print("has")
+            # isSaved = cv2.imwrite("{}/{}".format(self.output_path, file_name), img)
+            # return True if isSaved else False
 
         except Exception as ex:
             print("Exception occured: \"{}\"".format(ex))

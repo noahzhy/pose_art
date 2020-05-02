@@ -13,7 +13,6 @@ from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 from Body import Body
 
 
-# person_count = 0
 confidence_threshold = 0.35
 skeleton_color = np.random.randint(256, size=3).tolist()
 
@@ -26,9 +25,6 @@ keypoint_ids = [
     (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10),
     (1, 11), (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17),
 ]
-
-standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
-
 
 def default_log_dir():
     if platform.system() == "Windows":
@@ -118,7 +114,7 @@ def run():
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
             render_result(skeletons, color_image, confidence_threshold)
 
-            # person_count = len(skeletons)
+            standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
 
             for i in skeletons:
                 body.set_body(i)

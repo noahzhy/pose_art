@@ -27,6 +27,9 @@ class Body:
         self.body = body._asdict()["joints"]
         self.head_coordinates = Keypoint(self.body[0]).to_tuple()
 
+    def get_head_coordinates(self):
+        return self.head_coordinates
+
     # def parser(self):
     #     for keypoint in self.body:
     #         self.parsed_keypoint.append(Keypoint(keypoint).to_tuple())
@@ -57,9 +60,6 @@ class Body:
             angle = self.angle(self.body[pre], self.body[i],self.body[nex])
             angles_list.append(angle)
         return angles_list
-
-    def get_head_coordinates(self):
-        return self.head_coordinates
 
     def compare_skps_angles(self, error_rate, standard):
         """
