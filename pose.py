@@ -5,14 +5,15 @@ import argparse
 import cv2
 import os
 
-from Body import Body
-
 from pprint import pprint
 from cubemos.core.nativewrapper import CM_TargetComputeDevice
 from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 
+from Body import Body
 
+
+# person_count = 0
 confidence_threshold = 0.35
 skeleton_color = np.random.randint(256, size=3).tolist()
 
@@ -22,11 +23,12 @@ config.enable_stream(rs.stream.color, 320, 240, rs.format.bgr8, 30)
 pipe.start(config)
 
 keypoint_ids = [
-    (1, 2),(1, 5),(2, 3),(3, 4),(5, 6),(6, 7),(1, 8),(8, 9),(9, 10),
-    (1, 11),(11, 12),(12, 13),(1, 0),(0, 14),(14, 16),(0, 15),(15, 17),
+    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10),
+    (1, 11), (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17),
 ]
 
 standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
+
 
 def default_log_dir():
     if platform.system() == "Windows":
@@ -61,7 +63,8 @@ def check_license_and_variables_exist():
 
 def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
     limbs = [
-        (tuple(map(int, skeleton.joints[i])), tuple(map(int, skeleton.joints[v])))
+        (tuple(map(int, skeleton.joints[i])),
+         tuple(map(int, skeleton.joints[v])))
         for (i, v) in keypoint_ids
         if skeleton.confidences[i] >= confidence_threshold
         and skeleton.confidences[v] >= confidence_threshold
@@ -88,7 +91,7 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 
-if __name__ == "__main__":
+def run():
     try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
@@ -114,18 +117,22 @@ if __name__ == "__main__":
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
             render_result(skeletons, color_image, confidence_threshold)
-            
+
+            # person_count = len(skeletons)
+
             for i in skeletons:
                 body.set_body(i)
                 correct_score = body.compare_skps_angles(10, standard)
                 if correct_score > 80:
-                    cv2.putText(color_image, "success: {}".format(correct_score), (20,25), cv2.FONT_HERSHEY_COMPLEX, 1, (0,0,255), 2)
+                    cv2.putText(color_image, "success: {}".format(
+                        correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                 else:
-                    cv2.putText(color_image, "correct score: {}".format(correct_score), (20,25), cv2.FONT_HERSHEY_COMPLEX, 1, (255,0,0), 2)
+                    cv2.putText(color_image, "correct score: {}".format(
+                        correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", color_image)
-            
+
             key = cv2.waitKey(1)
             if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
@@ -136,3 +143,7 @@ if __name__ == "__main__":
 
     finally:
         pipe.stop()
+
+
+if __name__ == "__main__":
+    run()

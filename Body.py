@@ -15,21 +15,22 @@ class Keypoint:
         self.y = dict(points._asdict())['y']
     
     def to_tuple(self):
-        return (self.x, self.y)
+        return (round(self.x, 2), round(self.y, 2))
 
 
 class Body:
     def __init__(self):
         self.body = None
-        self.parsed_keypoint = list()
+        self.head_coordinates = (.0, .0)
 
     def set_body(self, body):
         self.body = body._asdict()["joints"]
+        self.head_coordinates = Keypoint(self.body[0]).to_tuple()
 
-    def parser(self):
-        for keypoint in self.body:
-            self.parsed_keypoint.append(Keypoint(keypoint).to_tuple())
-        return self.parsed_keypoint
+    # def parser(self):
+    #     for keypoint in self.body:
+    #         self.parsed_keypoint.append(Keypoint(keypoint).to_tuple())
+    #     return self.parsed_keypoint
 
     def angle(self, B, A, C):
         # calculate the angle of A
@@ -57,6 +58,8 @@ class Body:
             angles_list.append(angle)
         return angles_list
 
+    def get_head_coordinates(self):
+        return self.head_coordinates
 
     def compare_skps_angles(self, error_rate, standard):
         """
@@ -81,3 +84,4 @@ if __name__ == "__main__":
         body = Body()
         body.set_body(i)
         print(body.calculate_angles())
+        print(body.get_head_coordinates())

@@ -76,12 +76,12 @@ def get_valid_limbs(keypoint_ids, skeleton, confidence_threshold):
     return valid_limbs
 
 
-def render_result(skeletons, img, confidence_threshold):
-    skeleton_color = (100, 254, 213)
-    for index, skeleton in enumerate(skeletons):
-        limbs = get_valid_limbs(keypoint_ids, skeleton, confidence_threshold)
-        for limb in limbs:
-            cv2.line(img, limb[0], limb[1], skeleton_color, thickness=2, lineType=cv2.LINE_AA)
+# def render_result(skeletons, img, confidence_threshold):
+#     skeleton_color = (100, 254, 213)
+#     for index, skeleton in enumerate(skeletons):
+#         limbs = get_valid_limbs(keypoint_ids, skeleton, confidence_threshold)
+#         for limb in limbs:
+#             cv2.line(img, limb[0], limb[1], skeleton_color, thickness=2, lineType=cv2.LINE_AA)
 
 
 class SKP:
@@ -100,16 +100,19 @@ class SKP:
 
     def get_skp_from_pic(self, pic_path):
         try:
-            skps = dict()
             img = cv2.imread(pic_path)
             skeletons = self.api.estimate_keypoints(img, 192)
+            # draw the lines
             # render_result(skeletons, img, self.confidence_threshold)
             file_name = os.path.basename(pic_path)
             with open("{}/{}.json".format(self.skp_output_path, os.path.splitext(file_name)[0]), "w") as f:
+                skps = dict()
                 for i in skeletons:
                     self.body.set_body(i)
-                    id = skeletons.index(i)
-                    skps[str(id)] = self.body.calculate_angles()
+                    id = str(skeletons.index(i))
+                    skps[id] = dict()
+                    skps[id]['head'] = self.body.get_head_coordinates()
+                    skps[id]['angles'] = self.body.calculate_angles()
                 
                 json.dump(skps, f)
 
@@ -125,4 +128,4 @@ class SKP:
 
 if __name__ == "__main__":
     skp = SKP()
-    skp.get_skp_from_pic("arts_res/001.jpg")
+    skp.get_skp_from_pic("arts_res/003.jpg")
