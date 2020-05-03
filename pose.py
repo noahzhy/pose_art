@@ -12,7 +12,7 @@ from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 
 from Body import Body
 
-
+correct_rate = 75
 confidence_threshold = 0.35
 skeleton_color = np.random.randint(256, size=3).tolist()
 
@@ -119,7 +119,7 @@ def run():
             for i in skeletons:
                 body.set_body(i)
                 correct_score = body.compare_skps_angles(10, standard)
-                if correct_score > 80:
+                if correct_score > correct_rate:
                     cv2.putText(color_image, "success: {}".format(
                         correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                 else:
