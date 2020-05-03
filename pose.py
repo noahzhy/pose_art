@@ -11,9 +11,10 @@ from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 
 from Body import Body
+from utils import *
 
-correct_rate = 75
-confidence_threshold = 0.35
+correct_rate = 70
+confidence_threshold = 0.4
 skeleton_color = np.random.randint(256, size=3).tolist()
 
 pipe = rs.pipeline()
@@ -102,6 +103,8 @@ def run():
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
         body = Body()
+        start_bg = cv2.imread(os.path.join(RES_PATH, '000.jpg'))
+        # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
 
         while True:
             frames = pipe.wait_for_frames()
@@ -114,7 +117,9 @@ def run():
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
             render_result(skeletons, color_image, confidence_threshold)
 
+            res_for_show = list()
             standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
+            print(skeletons)
 
             for i in skeletons:
                 body.set_body(i)
