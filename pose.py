@@ -13,6 +13,9 @@ from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 from Body import Body
 from utils import *
 
+
+# correct answer maintain time (seconds)
+correct_maintain_time = 3
 correct_rate = 70
 confidence_threshold = 0.4
 skeleton_color = np.random.randint(256, size=3).tolist()
@@ -103,7 +106,7 @@ def run():
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
         body = Body()
-        start_bg = cv2.imread(os.path.join(RES_PATH, '000.jpg'))
+        start_bg = cv2.imread(os.path.join(RES_PATH, '000_000.jpg'))
         # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
 
         while True:
@@ -117,9 +120,9 @@ def run():
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
             render_result(skeletons, color_image, confidence_threshold)
 
-            res_for_show = list()
+            res_for_show = load_res_by_persons(len(skeletons))
             standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
-            print(skeletons)
+            # print(skeletons)
 
             for i in skeletons:
                 body.set_body(i)
