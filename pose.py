@@ -134,7 +134,7 @@ def run():
                     cv2.putText(color_image, "success: {}".format(
                         correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                 else:
-                    cv2.putText(color_image, "correct score: {}".format(
+                    cv2.putText(color_image, "score: {}".format(
                         correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)

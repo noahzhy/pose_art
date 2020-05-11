@@ -1,9 +1,11 @@
 import json
+import random
+import numpy as np
+
 from collections import namedtuple
 from typing import Sequence
 from collections import namedtuple
 from json import JSONEncoder
-import numpy as np
 
 
 Coordinate = namedtuple("Coordinate", ["x", "y"])
@@ -75,7 +77,7 @@ class Body:
                     without_empty.append(error_rate-error)
 
         if len(without_empty) <= half+1:
-            return 0
+            return random.randint(11, 21)/100
 
         return sum(without_empty)/(len(without_empty)*error_rate)
 

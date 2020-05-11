@@ -14,3 +14,7 @@ class timer:
         # seconds
         interval = (end_time-start_time).seconds
         return interval
+
+
+if __name__ == "__main__":
+    pass
