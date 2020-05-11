@@ -61,20 +61,23 @@ class Body:
             angles_list.append(angle)
         return angles_list
 
-    def compare_skps_angles(self, error_rate, standard):
+    def compare_skps_angles(self, error_rate, standard, half=4):
         """
         1. error rate, 2. standard angles answer, 3. user angles
         """
-        without_empty = list()
         correct_score = 0
-        user = self.calculate_angles()
-        for x, y in zip(user, standard):
+        without_empty = list()
+
+        for (x, y) in zip(self.calculate_angles(), standard):
             if not (x < 0 or y < 0):
-                without_empty.append(abs(x-y))
-        for i in without_empty:
-            if i < error_rate:
-                correct_score += int(100 / len(without_empty))
-        return correct_score
+                error = abs(x-y)
+                if error <= error_rate:
+                    without_empty.append(error_rate-error)
+
+        if len(without_empty) <= half+1:
+            return 0
+
+        return sum(without_empty)/(len(without_empty)*error_rate)
 
 
 if __name__ == "__main__":

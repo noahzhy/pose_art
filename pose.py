@@ -16,13 +16,13 @@ from utils import *
 
 # correct answer maintain time (seconds)
 correct_maintain_time = 3
-correct_rate = 70
-confidence_threshold = 0.4
+correct_rate = 56
+confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
 
 pipe = rs.pipeline()
 config = rs.config()
-config.enable_stream(rs.stream.color, 320, 240, rs.format.bgr8, 30)
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 pipe.start(config)
 
 keypoint_ids = [
@@ -108,6 +108,10 @@ def run():
         body = Body()
         start_bg = cv2.imread(os.path.join(RES_PATH, '000_000.jpg'))
         # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
+        # 001_001
+        # standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
+        # 002_002
+        standard = [113, 116, 74, 137, 176, 23, -1, 1, -1]
 
         while True:
             frames = pipe.wait_for_frames()
@@ -118,15 +122,14 @@ def run():
             skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
-            render_result(skeletons, color_image, confidence_threshold)
+            # render_result(skeletons, color_image, confidence_threshold)
 
-            res_for_show = load_res_by_persons(len(skeletons))
-            standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
+            # res_for_show = load_res_by_persons(len(skeletons))
             # print(skeletons)
 
             for i in skeletons:
                 body.set_body(i)
-                correct_score = body.compare_skps_angles(10, standard)
+                correct_score = int(body.compare_skps_angles(15, standard, 3)*100)
                 if correct_score > correct_rate:
                     cv2.putText(color_image, "success: {}".format(
                         correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
