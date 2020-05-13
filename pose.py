@@ -105,13 +105,8 @@ def run():
         )
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
-        # body = Body()
         start_bg = cv2.imread(os.path.join(RES_PATH, '000_000.jpg'))
         # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
-        # 001_001
-        # standard = [83, 102, 25, 105, 65, 29, -1, 19, -1]
-        # 002_002
-        standard = [113, 116, 74, 137, 176, 23, -1, 1, -1]
 
         while True:
             frames = pipe.wait_for_frames()

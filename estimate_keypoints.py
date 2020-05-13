@@ -65,7 +65,7 @@ class SKP:
     def __init__(self):
         super().__init__()
         check_license_and_variables_exist()
-        self.body = Body()
+        self.body = None
         self.confidence_threshold = 0.5
         self.skp_output_path = "skp_output"
         self.api = Api(default_license_dir())
