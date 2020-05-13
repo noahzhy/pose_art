@@ -27,17 +27,8 @@ class Body:
         self.body = body._asdict()["joints"]
         self.head_coordinates = Keypoint(self.body[0]).to_tuple()
 
-    def set_body(self, body):
-        self.body = body._asdict()["joints"]
-        self.head_coordinates = Keypoint(self.body[0]).to_tuple()
-
     def get_head_coordinates(self):
         return self.head_coordinates
-
-    # def parser(self):
-    #     for keypoint in self.body:
-    #         self.parsed_keypoint.append(Keypoint(keypoint).to_tuple())
-    #     return self.parsed_keypoint
 
     def angle(self, B, A, C):
         # calculate the angle of A
@@ -87,8 +78,6 @@ class Body:
         """
         1. error rate, 2. standard angles answer, 3. user angles
         """
-        # num_detected_keypoints = int(len([i for i in standard_ans if i>0])/2)+1
-        # correct_score = 0
         users, standard = list(), list()
 
         for (x, y) in zip(self.calculate_angles(), standard_ans):

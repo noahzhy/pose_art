@@ -82,7 +82,7 @@ class SKP:
             with open("{}/{}.json".format(self.skp_output_path, os.path.splitext(file_name)[0]), "w") as f:
                 skps = dict()
                 for i in skeletons:
-                    self.body.set_body(i)
+                    self.body = Body(i)
                     id = str(skeletons.index(i))
                     skps[id] = dict()
                     skps[id]['head'] = self.body.get_head_coordinates()

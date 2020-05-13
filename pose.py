@@ -105,7 +105,7 @@ def run():
         )
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
-        body = Body()
+        # body = Body()
         start_bg = cv2.imread(os.path.join(RES_PATH, '000_000.jpg'))
         # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
         # 001_001
@@ -128,7 +128,7 @@ def run():
             # print(skeletons)
 
             for i in skeletons:
-                body.set_body(i)
+                body = Body(i)
                 correct_score = int(body.compare_skps_angles(15, standard)*100)
                 if correct_score > correct_rate:
                     cv2.putText(color_image, "success: {}".format(

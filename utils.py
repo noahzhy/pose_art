@@ -47,64 +47,12 @@ def load_res():
             skp.get_skp_from_pic(os.path.join(RES_PATH, '{}.jpg'.format(i)))
 
 
-# def get_distance(vector1, vector2):
-#     d = 0
-#     for a,b in zip(vector1, vector2):
-#         d += (a-b)**2
-#     return d**0.5
-
-
 def load_arts_skp(basename):
     """
     load_arts_skp: basename of json data file
     """
     with open(os.path.join(SKP_PATH, "{}.json".format(basename))) as f:
         return json.loads(f.read())
-
-
-def find_closest(basename, detected_skps):
-    """
-    basename: basename of json file
-    detected_skps: skps
-    """
-    def load_arts_skp(basename):
-        with open(os.path.join(SKP_PATH, "{}.json".format(basename))) as f:
-            return json.loads(f.read())
-
-    dist_map = [[-1]*len(detected_skps) for i in range(len(detected_skps))]
-    print(load_arts_skp(basename))
-
-    # # json data
-    # res = load_arts_skp(basename)
-    # # (x, y) = me.get_head_coordinates()
-
-    # body = Body()
-    # for index_i, i in enumerate(detected_skps):
-    #     body.set_body(i)
-    #     head = body.get_head_coordinates()
-    #     for index_j, j in enumerate(res):
-    #         dist = get_distance(head, res[j]['head'])
-    #         # print(head, dist)
-    #         dist_map[index_i][index_j] = dist
-
-    # print(dist_map)
-    # for i in dist_map:
-    #     for j in i:
-    #         print(j)
-    # # print((x, y))
-    # # print(res)
-
-    # min_distance = sys.maxsize
-    min_id = 10
-
-
-        # dist = get_distance((x, y), (res[i]['head'][0], res[i]['head'][1]))
-    #     print("dist:", dist)
-    #     if min_distance > dist:
-    #         min_distance = dist
-    #         min_id = i
-
-    return min_id
 
 
 def load_res_by_persons(num):
