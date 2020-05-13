@@ -4,10 +4,12 @@ import sys
 import glob
 import json
 import math
+import operator
 
-from Body import Body
+from scipy import stats
 from collections import namedtuple
 from estimate_keypoints import SKP
+from Body import Body
 
 
 Coordinate = namedtuple("Coordinate", ["x", "y"])
@@ -45,11 +47,11 @@ def load_res():
             skp.get_skp_from_pic(os.path.join(RES_PATH, '{}.jpg'.format(i)))
 
 
-def get_distance(vector1, vector2):
-    d = 0
-    for a,b in zip(vector1, vector2):
-        d += (a-b)**2
-    return d**0.5
+# def get_distance(vector1, vector2):
+#     d = 0
+#     for a,b in zip(vector1, vector2):
+#         d += (a-b)**2
+#     return d**0.5
 
 
 def load_arts_skp(basename):
@@ -114,11 +116,28 @@ def load_res_by_persons(num):
 
 
 def compare_multi_users(multi_users_skps, standard_file_path):
-    json_data = load_arts_skp(standard_file_path)
-    for i in json_data:
-        print(i)
-    # json_data['angles']
-    # print(json_data['0']['angles'])
+    total_score = 0.0
+    standard_ans_stack = load_arts_skp(standard_file_path)
+    users_stack = [Body(i) for i in multi_users_skps]
+
+    for i in users_stack:
+        candidates = dict()
+        for num in standard_ans_stack:
+            users, standard = list(), list()
+            for (x, y) in zip(i.calculate_angles(), standard_ans_stack[num]['angles']):
+                if not (x < 0 or y < 0):
+                    users.append(x)
+                    standard.append(y)
+            
+            p = stats.pearsonr(users, standard)
+            p = p[0] if not (p[-1] > 0.5 and p[0]) < 0 else -p[0]
+            candidates[str(num)] = p
+
+        match_idx = max(candidates.items(), key=operator.itemgetter(1))[0]
+        del standard_ans_stack[match_idx]
+        total_score += round(candidates[match_idx], 2)
+
+    return total_score/len(users_stack)
 
 
 if __name__ == "__main__":
@@ -161,11 +180,15 @@ if __name__ == "__main__":
                 0.9005011320114136, 0.8303616046905518, 0.20512905716896057
             ], 
             id=1
-            )
-        ]
+        )
+    ]
 
-    # print(load_res_by_persons(1))
-    # id = find_closest("002_002", bodies)
-    # print(id)
-    compare_multi_users(bodies, '002_002')
-
+    count = 0
+    while count < 100:
+        count += 1
+        score = compare_multi_users(bodies, '999_000')
+        print(score)
+    # users, standard = [1, 2, 3], [3, 2, 1]
+    # s = stats.pearsonr(users, standard)[0]
+    # s = [s if s > 0 else 1+s]
+    # print(s)
