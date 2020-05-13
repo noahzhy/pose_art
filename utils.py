@@ -52,39 +52,47 @@ def get_distance(vector1, vector2):
     return d**0.5
 
 
+def load_arts_skp(basename):
+    """
+    load_arts_skp: basename of json data file
+    """
+    with open(os.path.join(SKP_PATH, "{}.json".format(basename))) as f:
+        return json.loads(f.read())
+
+
 def find_closest(basename, detected_skps):
     """
     basename: basename of json file
-    me: skps
+    detected_skps: skps
     """
     def load_arts_skp(basename):
         with open(os.path.join(SKP_PATH, "{}.json".format(basename))) as f:
             return json.loads(f.read())
 
     dist_map = [[-1]*len(detected_skps) for i in range(len(detected_skps))]
+    print(load_arts_skp(basename))
+
+    # # json data
+    # res = load_arts_skp(basename)
+    # # (x, y) = me.get_head_coordinates()
+
+    # body = Body()
+    # for index_i, i in enumerate(detected_skps):
+    #     body.set_body(i)
+    #     head = body.get_head_coordinates()
+    #     for index_j, j in enumerate(res):
+    #         dist = get_distance(head, res[j]['head'])
+    #         # print(head, dist)
+    #         dist_map[index_i][index_j] = dist
+
     # print(dist_map)
+    # for i in dist_map:
+    #     for j in i:
+    #         print(j)
+    # # print((x, y))
+    # # print(res)
 
-    # json data
-    res = load_arts_skp(basename)
-    # (x, y) = me.get_head_coordinates()
-
-    body = Body()
-    for index_i, i in enumerate(detected_skps):
-        body.set_body(i)
-        head = body.get_head_coordinates()
-        for index_j, j in enumerate(res):
-            dist = get_distance(head, res[j]['head'])
-            # print(head, dist)
-            dist_map[index_i][index_j] = dist
-
-    print(dist_map)
-    for i in dist_map:
-        for j in i:
-            print(j)
-    # print((x, y))
-    # print(res)
-
-    min_distance = sys.maxsize
+    # min_distance = sys.maxsize
     min_id = 10
 
 
@@ -100,8 +108,17 @@ def find_closest(basename, detected_skps):
 def load_res_by_persons(num):
     res_support = glob.glob(os.path.join(RES_PATH, '{:03d}_*.jpg'.format(num)))
     if not res_support:
+        # to return list to keep same format
         return [os.path.join(RES_PATH, '999_000.jpg')]
     return res_support
+
+
+def compare_multi_users(multi_users_skps, standard_file_path):
+    json_data = load_arts_skp(standard_file_path)
+    for i in json_data:
+        print(i)
+    # json_data['angles']
+    # print(json_data['0']['angles'])
 
 
 if __name__ == "__main__":
@@ -147,13 +164,8 @@ if __name__ == "__main__":
             )
         ]
 
-    # for i in bodies:
-    #     body = Body()
-    #     body.set_body(i)
-    #     id = find_closest("001_002", body)
-    #     print(id)
+    # print(load_res_by_persons(1))
+    # id = find_closest("002_002", bodies)
+    # print(id)
+    compare_multi_users(bodies, '002_002')
 
-    # print(load_res_by_persons(5))
-    id = find_closest("002_002", bodies)
-    print(id)
-    pass
