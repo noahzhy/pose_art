@@ -63,29 +63,55 @@ def load_res_by_persons(num):
     return res_support
 
 
+# def compare_multi_users(multi_users_skps, standard_file_path):
+#     total_score = 0.0
+#     standard_ans_stack = load_arts_skp(standard_file_path)
+#     num_standard = len(standard_ans_stack)
+#     min_detected_keypoints = 4
+#     users_stack = [Body(i) for i in multi_users_skps]
+
+#     for i in users_stack:
+#         candidates = dict()
+#         for num in standard_ans_stack:
+#             users, standard = list(), list()
+#             for (x, y) in zip(i.calculate_angles(), standard_ans_stack[num]['angles']):
+#                 if x >= 0 and y >= 0:
+#                     users.append(x)
+#                     standard.append(y)
+
+#             if len(users) >= min_detected_keypoints:
+#                 p = stats.pearsonr(users, standard)
+#                 p = p[0] if not (p[-1] > 0.5 and p[0]) < 0 else -p[0]
+#                 candidates[str(num)] = p
+
+#         if candidates:
+#             match_idx = max(candidates.items(), key=operator.itemgetter(1))[0]
+#             del standard_ans_stack[match_idx]
+#             total_score += candidates[match_idx]
+
+#     return round(total_score/num_standard, 2)
+
+
 def compare_multi_users(multi_users_skps, standard_file_path):
     total_score = 0.0
+    error_rate = 15
     standard_ans_stack = load_arts_skp(standard_file_path)
+    num_standard = len(standard_ans_stack)
+    min_detected_keypoints = 4
     users_stack = [Body(i) for i in multi_users_skps]
 
     for i in users_stack:
         candidates = dict()
         for num in standard_ans_stack:
-            users, standard = list(), list()
-            for (x, y) in zip(i.calculate_angles(), standard_ans_stack[num]['angles']):
-                if not (x < 0 or y < 0):
-                    users.append(x)
-                    standard.append(y)
-            
-            p = stats.pearsonr(users, standard)
-            p = p[0] if not (p[-1] > 0.5 and p[0]) < 0 else -p[0]
-            candidates[str(num)] = p
+            score = i.compare_skps_angles(standard_ans_stack[num]['angles'])
+            candidates[str(num)] = score
 
-        match_idx = max(candidates.items(), key=operator.itemgetter(1))[0]
-        del standard_ans_stack[match_idx]
-        total_score += round(candidates[match_idx], 2)
+        if candidates:
+            match_idx = max(candidates.items(), key=operator.itemgetter(1))[0]
+            del standard_ans_stack[match_idx]
+            total_score += candidates[match_idx]
 
-    return total_score/len(users_stack)
+    return round(total_score/num_standard, 2)
 
 
 if __name__ == "__main__":
@@ -132,7 +158,7 @@ if __name__ == "__main__":
     ]
 
     count = 0
-    while count < 100:
+    while count < 1:
         count += 1
         score = compare_multi_users(bodies, '999_000')
         print(score)

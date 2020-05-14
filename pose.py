@@ -16,7 +16,7 @@ from utils import *
 
 # correct answer maintain time (seconds)
 correct_maintain_time = 3
-correct_rate = 56
+correct_rate = 90
 confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
 
@@ -122,15 +122,14 @@ def run():
             # res_for_show = load_res_by_persons(len(skeletons))
             # print(skeletons)
 
-            for i in skeletons:
-                body = Body(i)
-                correct_score = int(body.compare_skps_angles(15, standard)*100)
-                if correct_score > correct_rate:
-                    cv2.putText(color_image, "success: {}".format(
-                        correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
-                else:
-                    cv2.putText(color_image, "score: {}".format(
-                        correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
+            correct_score = int(compare_multi_users(skeletons, '001_001')*100)
+
+            if correct_score > correct_rate:
+                cv2.putText(color_image, "success: {}".format(
+                    correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            else:
+                cv2.putText(color_image, "score: {}".format(
+                    correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", color_image)
