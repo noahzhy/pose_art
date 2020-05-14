@@ -30,16 +30,19 @@ class Body:
     def get_head_coordinates(self):
         return self.head_coordinates
 
-    def angle(self, B, A, C):
-        # calculate the angle of A
+    def angle(self, a, mid_point, b):
+            # calculate the angle of A
+        """ Calculate angle between two points """
         try:
-            a = np.array(A)
-            e1, e2 = (np.array(C)-a, np.array(B)-a)
-            denom = np.linalg.norm(e1) * np.linalg.norm(e2)
-            angle = np.arccos(np.dot(e1, e2)/denom) * 180 / np.pi
-
-            return int(angle)
+            mid_point = np.array(mid_point)
+            mid_a = np.array(a) - mid_point
+            mid_b = np.array(b) - mid_point
+            ang_a = np.arctan2(*mid_a[::-1])
+            ang_b = np.arctan2(*mid_b[::-1])
+            res = np.rad2deg((ang_a - ang_b) % (2 * np.pi))
+            return int(res if res<180 else (180-res))
         except Exception as e:
+            print(e)
             return -1
 
     def association_point(self, key):
@@ -81,11 +84,11 @@ class Body:
         users, standard = list(), list()
 
         for (x, y) in zip(self.calculate_angles(), standard_ans):
-            if not (x < 0 or y < 0):
+            if x >= 0 and y >= 0:
                 users.append(x)
                 standard.append(y)
 
-        if len(users) <= int(len(standard)/2)+1:
+        if len(users) <= int(len(standard_ans)/2)+1:
             return random.randint(11, 21)/100
         # calculate the correct rate
         return round(stats.pearsonr(users, standard)[0], 2)

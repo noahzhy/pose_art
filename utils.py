@@ -94,7 +94,7 @@ def load_res_by_persons(num):
 
 def compare_multi_users(multi_users_skps, standard_file_path):
     total_score = 0.0
-    error_rate = 15
+    # error_rate = 15
     standard_ans_stack = load_arts_skp(standard_file_path)
     num_standard = len(standard_ans_stack)
     min_detected_keypoints = 4

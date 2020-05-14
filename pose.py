@@ -27,7 +27,7 @@ pipe.start(config)
 
 keypoint_ids = [
     (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10),
-    (1, 11), (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17),
+    (1, 11), (11, 12), (12, 13), (1, 0),
 ]
 
 def default_log_dir():
@@ -117,7 +117,7 @@ def run():
             skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
-            # render_result(skeletons, color_image, confidence_threshold)
+            render_result(skeletons, color_image, confidence_threshold)
 
             # res_for_show = load_res_by_persons(len(skeletons))
             # print(skeletons)
