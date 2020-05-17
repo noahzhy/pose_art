@@ -23,11 +23,13 @@ skeleton_color = np.random.randint(256, size=3).tolist()
 pipe = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+width, height = (1280, 720)
+config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
 pipe.start(config)
 
 keypoint_ids = [
-    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10),
-    (1, 11), (11, 12), (12, 13), (1, 0),
+    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), 
+    (8, 9), (9, 10), (1, 11), (11, 12), (12, 13), (1, 0),
 ]
 
 def default_log_dir():
@@ -91,6 +93,34 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 
+def show_contours(base, width=640, height=480):
+    try:
+        while True:
+            conts_draw = base.copy()
+            frames = pipe.wait_for_frames()
+            depth_frame = frames.get_depth_frame()
+            if not depth_frame: continue
+            depth_image = np.fliplr(np.asanyarray(depth_frame.get_data()))
+            depth_image = np.uint8(np.where((depth_image>= 100) & (depth_image<=1500), 255, 0))
+            depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
+
+            # kernel = np.ones((7,7),np.uint8)
+            # depth_image = cv2.morphologyEx(depth_image, cv2.MORPH_CLOSE, kernel, 3)
+
+            contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
+            cv2.drawContours(conts_draw, contours, -1, (256,256,256), 5)
+            # Show images
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('RealSense', conts_draw)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+                break
+
+    finally:
+        pipe.stop()
+
+
 def run():
     try:
         check_license_and_variables_exist()
@@ -147,4 +177,6 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    # run()
+    base = init_windows('arts_res/001_001.jpg', True)
+    show_contours(base)

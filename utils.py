@@ -1,10 +1,12 @@
 # from tkinter import *
 import os
+import cv2
 import sys
 import glob
 import json
-import math
 import operator
+import numpy as np
+# import pyrealsense2 as rs
 
 from scipy import stats
 from collections import namedtuple
@@ -18,7 +20,7 @@ SkeletonKeypoints = namedtuple("SkeletonKeypoints", ["joints", "confidences", "i
 RES_PATH = 'arts_res'
 SKP_PATH = 'skp_output'
 
-def load_res():
+def check_res():
     def mk_dir(path):
         if not os.path.isdir(path):
             print('[INFO] make folder')
@@ -61,6 +63,31 @@ def load_res_by_persons(num):
         # to return list to keep same format
         return [os.path.join(RES_PATH, '999_000.jpg')]
     return res_support
+
+
+def init_windows(img, test_mode=False):
+    base = cv2.imread('bg.jpg')
+    
+    if test_mode:
+        base = cv2.resize(base, (1280, 720))
+
+    img = cv2.imread(img)
+    h, w, _ = img.shape
+    scale_percent = 60       # percent of original size
+    height = int(h * scale_percent / 100)
+    width = int(w * scale_percent / 100)
+    dim = (width, height)
+
+    img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    base[0:height, 0:width] = img_resized
+    
+    # cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
+    # cv2.imshow("preview", bg)
+    # cv2.waitKey()
+
+    return base
+
+
 
 
 # def compare_multi_users(multi_users_skps, standard_file_path):
@@ -157,12 +184,15 @@ if __name__ == "__main__":
         )
     ]
 
-    count = 0
-    while count < 1:
-        count += 1
-        score = compare_multi_users(bodies, '999_000')
-        print(score)
-    # users, standard = [1, 2, 3], [3, 2, 1]
-    # s = stats.pearsonr(users, standard)[0]
-    # s = [s if s > 0 else 1+s]
-    # print(s)
+    # count = 0
+    # while count < 1:
+    #     count += 1
+    #     score = compare_multi_users(bodies, '999_000')
+    #     print(score)
+
+
+    res_for_show = load_res_by_persons(len(bodies))
+    print(res_for_show)
+
+    base = init_windows('arts_res/001_001.jpg', True)
+    show_contours(base)
