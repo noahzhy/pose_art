@@ -20,17 +20,18 @@ correct_rate = 90
 confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
 
+width, height = (1280, 720)
 pipe = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-width, height = (1280, 720)
 config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
 pipe.start(config)
 
 keypoint_ids = [
-    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), 
+    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8),
     (8, 9), (9, 10), (1, 11), (11, 12), (12, 13), (1, 0),
 ]
+
 
 def default_log_dir():
     if platform.system() == "Windows":
@@ -93,35 +94,7 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 
-def show_contours(base, width=640, height=480):
-    try:
-        while True:
-            conts_draw = base.copy()
-            frames = pipe.wait_for_frames()
-            depth_frame = frames.get_depth_frame()
-            if not depth_frame: continue
-            depth_image = np.fliplr(np.asanyarray(depth_frame.get_data()))
-            depth_image = np.uint8(np.where((depth_image>= 100) & (depth_image<=1500), 255, 0))
-            depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
-
-            # kernel = np.ones((7,7),np.uint8)
-            # depth_image = cv2.morphologyEx(depth_image, cv2.MORPH_CLOSE, kernel, 3)
-
-            contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
-            cv2.drawContours(conts_draw, contours, -1, (256,256,256), 5)
-            # Show images
-            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('RealSense', conts_draw)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-                break
-
-    finally:
-        pipe.stop()
-
-
-def run():
+def run(render=False, depth=1500):
     try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
@@ -135,8 +108,7 @@ def run():
         )
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
-        start_bg = cv2.imread(os.path.join(RES_PATH, '000_000.jpg'))
-        # cv2.namedWindow("start", cv2.WINDOW_AUTOSIZE)
+        base = init_windows('arts_res/001_001.jpg')
 
         while True:
             frames = pipe.wait_for_frames()
@@ -147,36 +119,46 @@ def run():
             skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
-            render_result(skeletons, color_image, confidence_threshold)
 
-            # res_for_show = load_res_by_persons(len(skeletons))
-            # print(skeletons)
+            if render: render_result(skeletons, color_image, confidence_threshold)
 
             correct_score = int(compare_multi_users(skeletons, '001_001')*100)
+            color = (256, 256, 256)
 
             if correct_score > correct_rate:
+                color = (0, 256, 0)
                 cv2.putText(color_image, "success: {}".format(
                     correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             else:
                 cv2.putText(color_image, "score: {}".format(
                     correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
+            conts_draw = base.copy()
+            frames = pipe.wait_for_frames()
+            depth_frame = frames.get_depth_frame()
+            if not depth_frame: continue
+            depth_image = np.fliplr(np.asanyarray(depth_frame.get_data()))
+            depth_image = np.uint8(np.where((depth_image >= 100) & (depth_image <= depth), 255, 0))
+            depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
+            contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
+            cv2.drawContours(conts_draw, contours, -1, color, 5)
+
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
-            cv2.imshow("preview", color_image)
+            cv2.imshow("preview", conts_draw)
 
             key = cv2.waitKey(1)
             if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
                 break
 
-    except Exception as ex:
-        print("Exception occured: \"{}\"".format(ex))
+    except Exception as e:
+        print("Exception occured: \"{}\"".format(e))
 
     finally:
         pipe.stop()
 
 
 if __name__ == "__main__":
-    # run()
-    base = init_windows('arts_res/001_001.jpg', True)
-    show_contours(base)
+    run()
+    # base = init_windows('arts_res/001_001.jpg', True)
+    # show_contours(base)

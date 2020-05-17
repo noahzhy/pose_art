@@ -65,29 +65,17 @@ def load_res_by_persons(num):
     return res_support
 
 
-def init_windows(img, test_mode=False):
-    base = cv2.imread('bg.jpg')
-    
-    if test_mode:
-        base = cv2.resize(base, (1280, 720))
-
+def init_windows(img, width=1280, height=720):
+    base = cv2.resize(cv2.imread('bg.jpg'), (width, height))
     img = cv2.imread(img)
     h, w, _ = img.shape
-    scale_percent = 60       # percent of original size
-    height = int(h * scale_percent / 100)
-    width = int(w * scale_percent / 100)
-    dim = (width, height)
-
-    img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    base[0:height, 0:width] = img_resized
-    
-    # cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
-    # cv2.imshow("preview", bg)
-    # cv2.waitKey()
-
+    # percent of original size
+    scale_percent = 60
+    h = int(h * scale_percent / 100)
+    w = int(w * scale_percent / 100)
+    dim = (w, h)
+    base[:h, :w] = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
     return base
-
-
 
 
 # def compare_multi_users(multi_users_skps, standard_file_path):
@@ -194,5 +182,4 @@ if __name__ == "__main__":
     res_for_show = load_res_by_persons(len(bodies))
     print(res_for_show)
 
-    base = init_windows('arts_res/001_001.jpg', True)
-    show_contours(base)
+    base = init_windows('arts_res/001_001.jpg')
