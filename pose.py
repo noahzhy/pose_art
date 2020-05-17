@@ -100,7 +100,7 @@ def render_result(skeletons, img, confidence_threshold):
 
 
 def run(render=False, depth=1500, conts_line_color=(256,256,256)):
-    try:
+    # try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
         api = Api(default_license_dir())
@@ -126,27 +126,21 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
             skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.estimate_keypoints(color_image, 192)
             new_skeletons = api.update_tracking_id(skeletons, new_skeletons)
-
             if render: render_result(skeletons, color_image, confidence_threshold)
-
-            correct_score = int(compare_multi_users(skeletons, get_file_basename(res))*100)
-            conts_draw = base.copy()
-
-            if correct_score > correct_rate:
-                cv2.putText(conts_draw, "{}".format(
-                    correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
-            else:
-                cv2.putText(conts_draw, "{}".format(
-                    correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
             frames = pipe.wait_for_frames()
             depth_frame = frames.get_depth_frame()
             if not depth_frame: continue
             depth_image = np.fliplr(np.asanyarray(depth_frame.get_data()))
-            depth_image = np.uint8(np.where((depth_image >= 100) & (depth_image <= depth), 255, 0))
+            depth_image = np.uint8(np.where((depth_image>100) & (depth_image<depth), 255, 0))
             depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
             contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
+            conts_draw = base.copy()
             cv2.drawContours(conts_draw, contours, -1, conts_line_color, 5)
+
+            correct_score = int(compare_multi_users(skeletons, get_file_basename(res))*100)
+            score_color = (0, 256, 0) if correct_score > correct_rate else (256, 0, 0)
+            cv2.putText(conts_draw, "{}".format(correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", conts_draw)
@@ -156,11 +150,11 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
                 cv2.destroyAllWindows()
                 break
 
-    except Exception as e:
-        print("Exception occured: \"{}\"".format(e))
+    # except Exception as e:
+    #     print("Exception occured: \"{}\"".format(e))
 
-    finally:
-        pipe.stop()
+    # finally:
+    #     pipe.stop()
 
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ class Body:
             return int(res if res<180 else (180-res))
         except Exception as e:
             print(e)
-            return -1
+            return 0
 
     def association_point(self, key):
         return ((1, key+1) if key in [5, 8, 11] else (key-1, key+1))
@@ -84,7 +84,7 @@ class Body:
         users, standard = list(), list()
 
         for (x, y) in zip(self.calculate_angles(), standard_ans):
-            if x >= 0 and y >= 0:
+            if not (x == 0 or y == 0):
                 users.append(x)
                 standard.append(y)
 
