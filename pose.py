@@ -11,6 +11,7 @@ from cubemos.core.nativewrapper import CM_TargetComputeDevice
 from cubemos.core.nativewrapper import initialise_logging, CM_LogLevel
 from cubemos.skeleton_tracking.nativewrapper import Api, SkeletonKeypoints
 
+from Timer import Timer
 from Body import Body
 from utils import *
 
@@ -33,7 +34,7 @@ keypoint_ids = [
     (8, 9), (9, 10), (1, 11), (11, 12), (12, 13), (1, 0),
 ]
 
-SUCCESS_POSED = False
+POSE_SUCCESS = False
 TIMER_STARTING = False
 NUM_POSERONS = 1
 
@@ -116,6 +117,7 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
         
         res = random.choice(load_res_by_persons(NUM_POSERONS))
         base = init_windows(res)
+        timer = Timer()
 
         while True:
             frames = pipe.wait_for_frames()
@@ -139,7 +141,20 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
             cv2.drawContours(conts_draw, contours, -1, conts_line_color, 5)
 
             correct_score = int(compare_multi_users(skeletons, get_file_basename(res))*100)
-            score_color = (0, 256, 0) if correct_score > correct_rate else (256, 0, 0)
+            if correct_score > correct_rate:
+                # pass
+                score_color = (0, 256, 0)
+                if not timer.timer_started:
+                    timer.start()
+                else:
+                    if timer.get_time() < 1.0:
+                        cv2.putText(conts_draw, "{}".format(1.0-timer.get_time()), (width-100, 75), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
+                    else:
+                        cv2.imwrite('img_saved.jpg', color_image)
+                        timer.stop()
+            else:
+                # not pass yet
+                score_color = (256, 0, 0)
             cv2.putText(conts_draw, "{}".format(correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
