@@ -17,7 +17,7 @@ from utils import *
 
 
 # correct answer maintain time (seconds)
-correct_maintain_time = 3
+correct_maintain_time = 3.0
 correct_rate = 90
 confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
@@ -147,14 +147,17 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
                 if not timer.timer_started:
                     timer.start()
                 else:
-                    if timer.get_time() < 1.0:
-                        cv2.putText(conts_draw, "{}".format(1.0-timer.get_time()), (width-100, 75), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
+                    if timer.get_time() < correct_maintain_time:
+                        cv2.putText(conts_draw, "{}".format(int(correct_maintain_time-timer.get_time())), (width-100, 75), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
                     else:
                         cv2.imwrite('img_saved.jpg', color_image)
+                        cv2.imshow("test", color_image)
                         timer.stop()
             else:
                 # not pass yet
+                timer.stop()
                 score_color = (256, 0, 0)
+
             cv2.putText(conts_draw, "{}".format(correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, score_color, 2)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
