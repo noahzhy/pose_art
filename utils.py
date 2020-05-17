@@ -20,6 +20,11 @@ SkeletonKeypoints = namedtuple("SkeletonKeypoints", ["joints", "confidences", "i
 RES_PATH = 'arts_res'
 SKP_PATH = 'skp_output'
 
+
+def get_file_basename(path):
+    return os.path.splitext(os.path.basename(path))[0]
+
+
 def check_res():
     def mk_dir(path):
         if not os.path.isdir(path):
@@ -109,10 +114,8 @@ def init_windows(img, width=1280, height=720):
 
 def compare_multi_users(multi_users_skps, standard_file_path):
     total_score = 0.0
-    # error_rate = 15
     standard_ans_stack = load_arts_skp(standard_file_path)
     num_standard = len(standard_ans_stack)
-    min_detected_keypoints = 4
     users_stack = [Body(i) for i in multi_users_skps]
 
     for i in users_stack:
@@ -171,13 +174,6 @@ if __name__ == "__main__":
             id=1
         )
     ]
-
-    # count = 0
-    # while count < 1:
-    #     count += 1
-    #     score = compare_multi_users(bodies, '999_000')
-    #     print(score)
-
 
     res_for_show = load_res_by_persons(len(bodies))
     print(res_for_show)

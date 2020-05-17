@@ -2,6 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import platform
 import argparse
+import random
 import cv2
 import os
 
@@ -31,6 +32,10 @@ keypoint_ids = [
     (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8),
     (8, 9), (9, 10), (1, 11), (11, 12), (12, 13), (1, 0),
 ]
+
+SUCCESS_POSED = False
+TIMER_STARTING = False
+NUM_POSERONS = 1
 
 
 def default_log_dir():
@@ -94,7 +99,7 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 
-def run(render=False, depth=1500):
+def run(render=False, depth=1500, conts_line_color=(256,256,256)):
     try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
@@ -108,7 +113,9 @@ def run(render=False, depth=1500):
         )
         api.load_model(CM_TargetComputeDevice.CM_CPU, model_path)
 
-        base = init_windows('arts_res/001_001.jpg')
+        
+        res = random.choice(load_res_by_persons(NUM_POSERONS))
+        base = init_windows(res)
 
         while True:
             frames = pipe.wait_for_frames()
@@ -122,18 +129,16 @@ def run(render=False, depth=1500):
 
             if render: render_result(skeletons, color_image, confidence_threshold)
 
-            correct_score = int(compare_multi_users(skeletons, '001_001')*100)
-            color = (256, 256, 256)
+            correct_score = int(compare_multi_users(skeletons, get_file_basename(res))*100)
+            conts_draw = base.copy()
 
             if correct_score > correct_rate:
-                color = (0, 256, 0)
-                cv2.putText(color_image, "success: {}".format(
-                    correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(conts_draw, "{}".format(
+                    correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             else:
-                cv2.putText(color_image, "score: {}".format(
-                    correct_score), (20, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
+                cv2.putText(conts_draw, "{}".format(
+                    correct_score), (width-100, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
-            conts_draw = base.copy()
             frames = pipe.wait_for_frames()
             depth_frame = frames.get_depth_frame()
             if not depth_frame: continue
@@ -141,7 +146,7 @@ def run(render=False, depth=1500):
             depth_image = np.uint8(np.where((depth_image >= 100) & (depth_image <= depth), 255, 0))
             depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
             contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
-            cv2.drawContours(conts_draw, contours, -1, color, 5)
+            cv2.drawContours(conts_draw, contours, -1, conts_line_color, 5)
 
             cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("preview", conts_draw)
