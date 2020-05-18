@@ -19,10 +19,10 @@ try:
         depth_image = np.uint8(np.where((depth_image>= 100) & (depth_image<=1500), 255, 0))
         depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
 
-        # kernel = np.ones((5,5),np.uint8)
-        # depth_image = cv2.morphologyEx(depth_image, cv2.MORPH_CLOSE, kernel, 3)
+        kernel = np.ones((5,5),np.uint8)
+        depth_image = cv2.morphologyEx(depth_image, cv2.MORPH_CLOSE, kernel, 3)
 
-        contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
+        contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_EXTERNAL, 1)
         cv2.drawContours(bg, contours, -1, 256, 5)
         # Show images
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)

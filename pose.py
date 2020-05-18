@@ -22,7 +22,7 @@ correct_rate = 90
 confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
 
-width, height = (1280, 720)
+width, height = (640, 480)
 pipe = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -100,7 +100,7 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 
-def run(render=False, depth=1500, conts_line_color=(256,256,256)):
+def run(render=False, depth=1850, conts_line_color=(256,256,256)):
     # try:
         check_license_and_variables_exist()
         sdk_path = os.environ["CUBEMOS_SKEL_SDK"]
@@ -133,10 +133,15 @@ def run(render=False, depth=1500, conts_line_color=(256,256,256)):
             frames = pipe.wait_for_frames()
             depth_frame = frames.get_depth_frame()
             if not depth_frame: continue
-            depth_image = np.fliplr(np.asanyarray(depth_frame.get_data()))
-            depth_image = np.uint8(np.where((depth_image>100) & (depth_image<depth), 255, 0))
-            depth_image = cv2.bilateralFilter(depth_image, 9, 100, 100)
-            contours, hierarchy = cv2.findContours(depth_image, cv2.RETR_TREE, 1)
+
+            conts_draw = np.fliplr(np.asanyarray(depth_frame.get_data()))
+            conts_draw = np.uint8(np.where((conts_draw>100) & (conts_draw<depth), 255, 0))
+            conts_draw = cv2.bilateralFilter(conts_draw, 9, 100, 100)
+
+            kernel = np.ones((5,5),np.uint8)
+            conts_draw = cv2.morphologyEx(conts_draw, cv2.MORPH_CLOSE, kernel, 3)
+            contours, hierarchy = cv2.findContours(conts_draw, cv2.RETR_EXTERNAL, 1)
+
             conts_draw = base.copy()
             cv2.drawContours(conts_draw, contours, -1, conts_line_color, 5)
 
