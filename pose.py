@@ -18,7 +18,7 @@ from utils import *
 
 # correct answer maintain time (seconds)
 correct_maintain_time = 3.0
-correct_rate = 90
+correct_rate = 82
 confidence_threshold = 0.5
 skeleton_color = np.random.randint(256, size=3).tolist()
 
@@ -138,7 +138,7 @@ def run(render=False, depth=1850, conts_line_color=(256,256,256)):
             conts_draw = np.uint8(np.where((conts_draw>100) & (conts_draw<depth), 255, 0))
             conts_draw = cv2.bilateralFilter(conts_draw, 9, 100, 100)
 
-            kernel = np.ones((5,5),np.uint8)
+            kernel = np.ones((7,7),np.uint8)
             conts_draw = cv2.morphologyEx(conts_draw, cv2.MORPH_CLOSE, kernel, 3)
             contours, hierarchy = cv2.findContours(conts_draw, cv2.RETR_EXTERNAL, 1)
 
